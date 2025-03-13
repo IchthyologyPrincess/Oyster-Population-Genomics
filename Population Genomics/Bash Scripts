@@ -88,7 +88,6 @@ done
 
 module load python
 module load bowtie2/2.5.1
-source activate bowtie_mapping
 cd /work/kadam79/raw_data/mapped
 for infile in *_output_sorted.bam; do
     base=$(basename ${infile} _output_sorted.bam)
