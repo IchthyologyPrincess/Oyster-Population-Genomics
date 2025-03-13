@@ -1,0 +1,99 @@
+##Step 1: I ran raw sequence data (fq.gz files, found in raw_data/C202SC18101577/preharvey_raw_data) through trimmomatic, results are in raw_data/trimmed
+
+#Setting trimming to a loop through the directories
+
+dirs=("AB13" "AB14" "AB15" "AB16" "AB17" "AB18", "AB19", "AB20" "AB21" "AB22" "AB24" \
+    "AB25" "AB26" "AB27" "AB28" "AB29" "AB31" "AB32" "AB33" "AB34" "AB39" "AB40" "AB5" "AB6" "AB7" "AB8" "AB9" \
+    "LC1" "LC10" "LC12 " "LC13" "LC14" "LC15" "LC16" "LC17" "LC18" "LC19" "LC2" \
+    "LC20" "LC21" "LC22" "LC22" "LC4" "LC5" "LC6" "LC7" "LC8" "LC9" "LF10" "LF11" "LF13" "LF14" "LF15" "LF16" \
+    "LF17" "LF19" "LF2" "LF20" "LF21" "LF22" "LF23" "LF24" "LF3" "LF4" "LF5" "LF6" "LF7" "LF8" \
+    "MI12" "MI13" "MI14" "MI15" "MI16" "MI17" "MI18" "MI19" "MI20" "MI22" "MI23" "MI24" "MI25" \
+    "MI26" "MI3" "MI4" "MI5" "MI6" "MI7" "MI9" "SL1" "SL10" "SL11" "SL12" "SL14" "SL15" "SL21" \
+    "SL23" "SL25" "SL26" "SL28" "SL3" "SL31" "SL32" "SL33" "SL4" "SL6" "SL7" "SL8" "SL9" )
+
+# Loop through each directory
+for dir in "${dirs[@]}"; do
+  # Set input and output file paths
+  input1="/work/kadam79/raw_data/C202SC18101577/preharvey_raw_data/${dir}/${dir}*_1.fq.gz"
+  input2="/work/kadam79/raw_data/C202SC18101577/preharvey_raw_data/${dir}/${dir}*_2.fq.gz"
+  output1="/work/kadam79/raw_data/trimmed/${dir}_output_p_1.fq.gz"
+  output_unpaired1="/work/kadam79/raw_data/trimmed/${dir}_output_unpaired_1.fq.gz"
+  output2="/work/kadam79/raw_data/trimmed/${dir}_output_p_2.fq.gz"
+  output_unpaired2="/work/kadam79/raw_data/trimmed/${dir}_output_unpaired_2.fq.gz"
+
+  # Run the trimmomatic command
+  java -jar /work/kadam79/Trimmomatic/Trimmomatic-0.39/trimmomatic-0.39.jar \
+    PE $input1 $input2 $output1 $output_unpaired1 $output2 $output_unpaired2 \
+    ILLUMINACLIP:TruSeq3-PE.fa:2:30:10:2:True LEADING:3 TRAILING:3 MINLEN:36
+done
+
+##Step 2: I had to index the reference genome to use in bowtie mapping - found in raw_data/reference
+
+module load python
+module load bowtie2/2.5.1
+
+bowtie2-build /work/kadam79/star_index/haplotig_masked_genome.fasta haplotig_masked_genome_index
+
+##Step 3: Mapping with Bowtie 2 - results in .bam files, found in raw_data/mapped
+
+module load python
+module load bowtie2/2.5.1
+
+files=("AB10" "AB11" "AB13" "AB14" "AB15" "AB16" "AB17" "AB18" "AB19" "AB20" "AB21" "AB22" "AB24" \
+    "AB25" "AB26" "AB27" "AB28" "AB29" "AB31" "AB32" "AB33" "AB34" "AB39" "AB40" "AB5" "AB6" "AB7" "AB8" "AB9" \
+    "LC1" "LC10" "LC12" "LC13" "LC14" "LC15" "LC16" "LC17" "LC18" "LC19" "LC2" \
+    "LC20" "LC21" "LC22" "LC22" "LC4" "LC5" "LC6" "LC7" "LC8" "LC9" "LF10" "LF11" "LF13" "LF14" "LF15" "LF16" \
+    "LF17" "LF19" "LF2" "LF20" "LF21" "LF22" "LF23" "LF24" "LF3" "LF4" "LF5" "LF6" "LF7" "LF8" \
+    "MI12" "MI13" "MI14" "MI15" "MI16" "MI17" "MI18" "MI19" "MI20" "MI22" "MI23" "MI24" "MI25" \
+    "MI26" "MI3" "MI4" "MI5" "MI6" "MI7" "MI9" "SL1" "SL10" "SL11" "SL12" "SL14" "SL15" "SL21" \
+    "SL23" "SL25" "SL26" "SL28" "SL3" "SL31" "SL32" "SL33" "SL4" "SL6" "SL7" "SL8" "SL9" )
+
+for file in "${files[@]}"; do
+
+    bowtie2 -q --phred33 --very-sensitive -p 32 -I 0 -X 1500 --fr \
+    --rg-id ${file} --rg SM:${file} --rg LB:library_one --rg PL:ILLUMINA \
+    -x /work/kadam79/raw_data/reference/haplotig_masked_genome_index -1 /work/kadam79/raw_data/trimmed/${file}_output_p_1.fq.gz -2 /work/kadam79/raw_dat$
+    2> shallow_bowtie.log| /work/kadam79/samtools-1.3.1/samtools view -h -b -o ${file}_output.bam
+
+done
+
+##Step 4: Checking that everything in the bam files is named correctly, found in /raw_data/mapped/checkbam
+
+files=("AB10" "AB11" "AB13" "AB14" "AB15" "AB16" "AB17" "AB18" "AB19" "AB20" "AB21" "AB22" "AB24" \
+    "AB25" "AB26" "AB27" "AB28" "AB29" "AB31" "AB32" "AB33" "AB34" "AB39" "AB40" "AB5" "AB6" "AB7" "AB8" "AB9" \
+    "LC1" "LC10" "LC12" "LC13" "LC14" "LC15" "LC16" "LC17" "LC18" "LC19" "LC2" \
+    "LC20" "LC21" "LC22" "LC22" "LC4" "LC5" "LC6" "LC7" "LC8" "LC9" "LF10" "LF11" "LF13" "LF14" "LF15" "LF16" \
+    "LF17" "LF19" "LF2" "LF20" "LF21" "LF22" "LF23" "LF24" "LF3" "LF4" "LF5" "LF6" "LF7" "LF8" \
+    "MI12" "MI13" "MI14" "MI15" "MI16" "MI17" "MI18" "MI19" "MI20" "MI22" "MI23" "MI24" "MI25" \
+    "MI26" "MI3" "MI4" "MI5" "MI6" "MI7" "MI9" "SL1" "SL10" "SL11" "SL12" "SL14" "SL15" "SL21" \
+    "SL23" "SL25" "SL26" "SL28" "SL3" "SL31" "SL32" "SL33" "SL4" "SL6" "SL7" "SL8" "SL9" )
+
+for file in "${files[@]}"; do
+
+/work/kadam79/samtools-1.3.1/samtools view -H ${file}_output.bam | grep "^@RG"
+
+done
+
+
+##Step 5: sorting bam files
+
+module load samtools/1.19
+cd /work/kadam79/raw_data/mapped
+for infile in *_output.bam; do
+    base=$(basename ${infile} .bam)
+    samtools view -h -q 20 ${infile} | samtools view -buS - | samtools sort -o ${base}_sorted.bam
+done
+
+##Step 6: removing pcr duplicates
+
+module load python
+module load bowtie2/2.5.1
+source activate bowtie_mapping
+cd /work/kadam79/raw_data/mapped
+for infile in *_output_sorted.bam; do
+    base=$(basename ${infile} _output_sorted.bam)
+    java -jar /work/kadam79/picard/picard/build/libs/picard.jar MarkDuplicates I=${base}_output_sorted.bam O=${base}_output_sorted_dedup.bam M=${base}_s$
+done
+
+#citation for picard “Picard Toolkit.” 2019. Broad Institute, GitHub Repository. https://broadinstitute.github.io/picard/; Broad Institute
+
