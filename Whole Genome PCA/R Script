@@ -1,0 +1,43 @@
+library(ggplot2)
+library(dplyr)
+
+#import the CovMat files for each population
+
+ab.cov <- ("~/AB_pop_angsd.covMat")
+
+lf.cov <- ("~/LF_pop_angsd.covMat")
+
+lc.cov <- ("~/LC_pop_angsd.covMat")
+
+mi.cov <- ("~/MI_pop_angsd.covMat")
+
+sl.cov <- ("~/SL_pop_angsd.covMat")
+
+#express those files as matrices
+abm <- as.matrix(read.table(ab.cov))
+lfm <- as.matrix(read.table(lf.cov))
+lcm <- as.matrix(read.table(lc.cov))
+mim <- as.matrix(read.table(mi.cov))
+slm <- as.matrix(read.table(sl.cov))
+
+#obtain the Eigen values of the matrices
+abe <- eigen(abm)
+lfe <- eigen(lfm)
+lce <- eigen(lcm)
+mie <- eigen(mim)
+sle <- eigen(slm)
+
+#look at the vectors of the Eigen values and remove outliers / missing data then create a data table, in column one put "Population", column two will be "1", and column three will be "2". In columns labeled 1 and 2, put the vector values and then put their respective population in the population column and save the file as a .csv file.
+abe$vector[,1:2]
+lce$vectors[,1:2]
+lfe$vectors[,1:2]
+mie$vectors[,1:2]
+sle$vectors[,1:2]
+
+#read in the .csv and plot the PCA
+
+tvectors <-read.csv("~/TrimmedVectors.csv")
+ggplot(tvectors, aes(x=X1,y=X2, col=Population))+
+geom_point()
+
+#these directions came from (https://www.popgen.dk/angsd/index.php/PCA_MDS)
