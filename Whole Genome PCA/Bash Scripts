@@ -1,0 +1,78 @@
+#!/bin/bash
+
+#The input files will be text files for each population, the text file will contain the file path of each individual’s .bam file in that population. You will also need the .fasta file of the reference genome.
+#To get geno, .maf, .covar, .arg, .geno, .glf, .saf, .saf.idx, and .saf.pos files
+
+while IFS= read -r line; do
+
+echo $line
+
+~/angsd/angsd -b ~/${line}_pop_list.txt -anc ~/reference.fasta
+-ref ~/reference.fasta -doCounts 1 -doMaf 1 -remove_bads 1 -uniqueOnly 1
+-baq 1 -minQ 20 -minMapQ 20 -only_proper_pairs 1
+-trim 0 -C 50 -setMinDepth 10 -setMaxDepth 350 -minInd n/2 -doMajorMinor 1
+-GL 1 -doGlf 4 -minMaf 0.01 -doSaf 1 -skipTriallelic 1 -SNP_pval 1e-6 -P $NB_CPU
+-doGeno 5 -doPost 1 -doIBS 1 -doCov 1 -makeMatrix 1
+-out ~/${line}_pop_angsd
+
+done < ~/pop_lists.txt
+
+#with these files you can go into the R environment and make a whole genome pca (in a separate text file)
+
+#Make bcf files
+
+for file in ~/*.bam;
+do base=$(basename ${file} .bam);
+~/bcftools-1.21/bcftools mpileup -f ~/haplotig_masked_genome.fna --threads 20 $file |
+~/bcftools-1.21/bcftools call -mv -Ob -o $base.bcf
+done
+
+#convert those .bcf files to .vcf files
+
+for file in ~/*bcf; do
+base=$(basename ${file} .bcf);
+~/bcftools-1.21/bcftools convert --threads 20 -O z -o ${base}.vcf.gz ${base}.bcf;
+done
+
+#filter the .vcf files
+
+module load vcftools/0.1.16
+
+for file in ~/*.vcf.gz; do
+base=$(basename ${file} .vcf.gz)
+vcftools --gzvcf ~/${base}.vcf.gz
+--maf 0.1 --max-missing 0.90 --minQ 30 --minDP 1 --maxDP 6
+--recode --recode-INFO-all --stdout | gzip -c > ${base}_filtered.vcf.gz
+done
+
+#here is another possible way to filter the .vcf files in a loop
+
+while IFS= read -r line; do
+echo $line
+vcftools --gzvcf ~/${line}.vcf.gz
+--maf 0.1 --max-missing 0.90 --minQ 30 --minDP 1 --maxDP 6
+--recode --recode-INFO-all --stdout | gzip -c > ${line}_filtered.vcf.gz
+done
+
+#if you need the files unzipped
+
+for file in ~/*filtered.vcf.gz; do
+gunzip "$file"
+done
+
+#if you need to bgzip the files
+
+for file in ~/*filtered.vcf; do
+~/htslib/bgzip "$file"
+~/htslib/tabix -p vcf "$file.gz"
+done
+
+#merging the .vcf files into one file
+
+for i in *filtered.vcf.gz
+do
+~/bcftools-1.21/bcftools index $i
+done
+~/bcftools-1.21/bcftools merge ~/*filtered.vcf.gz -O z -o all_oysters_filtered.vcf.gz
+
+#at this point if you’re using HPC to run the R environment you want to go ahead and move any environmental data files to a directory in that workspace, most likely as a .csv file.
