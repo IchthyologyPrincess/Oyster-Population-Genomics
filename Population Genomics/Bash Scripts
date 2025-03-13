@@ -1,3 +1,5 @@
+#!/bin/bash
+
 ##Step 1: I ran raw sequence data (fq.gz files, found in raw_data/C202SC18101577/preharvey_raw_data) through trimmomatic, results are in raw_data/trimmed
 
 #Setting trimming to a loop through the directories
