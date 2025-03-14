@@ -99,7 +99,7 @@ done
 
 #citation for picard “Picard Toolkit.” 2019. Broad Institute, GitHub Repository. https://broadinstitute.github.io/picard/; Broad Institute
 
-##Step 7: clipping overlapping reads 
+##Step 7: clipping overlapping reads using bamUtil 
 
 module load python
 module load bowtie2/2.5.1 
@@ -107,7 +107,7 @@ source activate bowtie_mapping
 cd /work/kadam79/raw_data/mapped/
 for infile in *_output_sorted_dedup.bam; do
     base=$(basename ${infile} _output_sorted_dedup.bam)
-    /work/kadam79/raw_data/mapped/ clipOverlap --in ${infile} --out ${base}_output_sorted_dedup_overlapclipped.bam --stats
+    /work/kadam79/raw_data/mapped/bam clipOverlap --in ${infile} --out ${base}_output_sorted_dedup_overlapclipped.bam --stats
 done 
 
 ##Step 8: indexing bam files 
