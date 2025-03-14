@@ -110,4 +110,25 @@ for infile in *_output_sorted_dedup.bam; do
     /work/kadam79/raw_data/mapped/ clipOverlap --in ${infile} --out ${base}_output_sorted_dedup_overlapclipped.bam --stats
 done 
 
+##Step 8: indexing bam files 
+
+for infile in *_output_sorted_dedup_overlapclipped.bam; do
+/work/kadam79/samtools-1.3.1/samtools index $infile
+done 
+
+##Step 9: calling variants (making .vcf files) 
+
+cd /work/kadam79/raw_data/mapped
+module load bcftools/1.18
+REF=/work/kadam79/raw_data/reference/haplotig_masked_genome.fna
+for infile in *_output_sorted_dedup_overlapclipped.bam;  
+do
+    base=$(basename "${infile}" _output_sorted_dedup_overlapclipped.bam)
+    # echo $base
+    bcftools mpileup -a AD,DP,SP -Ou -f $REF \
+    "$infile" | bcftools call -f GQ,GP \
+    -mO z -o /work/kadam79/raw_data/vcf_files/"$base".vcf.gz
+done
+
+
 
