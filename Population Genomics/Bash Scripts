@@ -110,6 +110,9 @@ for infile in *_output_sorted_dedup.bam; do
     /work/kadam79/raw_data/mapped/bam clipOverlap --in ${infile} --out ${base}_output_sorted_dedup_overlapclipped.bam --stats
 done 
 
+#https://github.com/nt246/physalia-lcwgs/blob/main/day_1/markdowns/data_processing.md#deduplicate-and-clip-overlapping-read-pairs 
+
+
 ##Step 8: indexing bam files 
 
 for infile in *_output_sorted_dedup_overlapclipped.bam; do
