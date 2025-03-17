@@ -133,5 +133,38 @@ do
     -mO z -o /work/kadam79/raw_data/vcf_files/"$base".vcf.gz
 done
 
+##Step 9: filtering vcf files
+
+module load vcftools/0.1.16
+
+for file in /work/kadam79/raw_data/vcf_files/*.vcf.gz; do
+    base=$(basename ${file} .vcf.gz)
+    vcftools --gzvcf /work/kadam79/raw_data/vcf_files/${base}.vcf.gz \
+    --maf 0.1 --max-missing 0.90 --minQ 30 --minDP 1 --maxDP 6 \
+    --recode --recode-INFO-all --stdout | gzip -c > /work/kadam79/raw_data/vcf_files/filtered/${base}_filtered.vcf.gz
+done
+
+## Step 10: The files that come out are zipped but in order to be merged they must be bgzipped, so we will unzip and rezip them 
+
+for file in /work/kadam79/raw_data/vcf_files/filtered/*filtered.vcf.gz; do
+  gunzip "$file"
+done
+
+/work/kadam79/htslib/bgzip
+/work/kadam79/htslib/tabix
+for file in /work/kadam79/raw_data/vcf_files/filtered/*filtered.vcf; do
+  bgzip "$file"
+  tabix -p vcf "$file.gz"
+done
+
+##Step 11: merging vcf files 
+
+for i in *filtered.vcf.gz 
+do
+/work/kadam79/bcftools-1.21/bcftools index $i
+done
+/work/kadam79/bcftools-1.21/bcftools merge /work/kadam79/raw_data/vcf_files/filtered/*filtered.vcf.gz -O z -o all_oysters_filtered.vcf.gz
+
+
 
 
