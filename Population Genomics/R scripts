@@ -1,6 +1,6 @@
-#!user/bin/R
+#!/usr/bin/Rscript
 
-##we will be using LEA and BiocManager to do the genome environment associations##
+##we will be using LEA and BiocManager to do the genome environment associations
 ##These are the links to the resources:
 #https://baylab.github.io/MarineGenomicsSemester/genome-environment-association.html#get-the-environmental-data 
 #https://academic.oup.com/mbe/article/36/4/852/5290100#138397507 
