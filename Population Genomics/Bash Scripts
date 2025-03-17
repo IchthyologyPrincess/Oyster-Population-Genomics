@@ -164,6 +164,6 @@ do
 done
 /work/kadam79/bcftools-1.21/bcftools merge /work/kadam79/raw_data/vcf_files/filtered/*filtered.vcf.gz -O z -o all_oysters_filtered.vcf.gz
 
-
+##Now move on to the R scripts
 
 
