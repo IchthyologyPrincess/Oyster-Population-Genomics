@@ -6,3 +6,27 @@
 #https://academic.oup.com/mbe/article/36/4/852/5290100#138397507 
 #https://rdrr.io/bioc/LEA/
 #http://membres-timc.imag.fr/Olivier.Francois/LEA/files/LEA_github.pdf
+
+library(BiocManager)
+library("LEA")
+
+C.virginica_lfmm <- vcf2lfmm(input.file = "/work/kadam79/raw_data/vcf_files/filtered/all_oysters_filtered.vcf", output.file = "/work/kadam79/analyses/all_oysters_filtered.lfmm" , force = TRUE)
+
+# - number of detected individuals:  110
+# - number of detected loci:    8437174
+
+write.env("/work/kadam79/analyses/Environmental_Data.csv", "salinity_data.env")
+
+pc = pca("/work/kadam79/raw_data/vcf_files/filtered/all_oysters_filtered.lfmm", scale = TRUE)
+
+#summary of the options:
+#
+#        -n (number of individuals)          110
+#        -L (number of loci)                 8437174
+#        -K (number of principal components) 110
+#        -x (genotype file)                  /work/kadam79/raw_data/vcf_files/filtered/all_oysters_filtered.lfmm
+#        -a (eigenvalue file)                /work/kadam79/raw_data/vcf_files/filtered/all_oysters_filtered.pca/all_oysters_filtered.eigenvalues
+#        -e (eigenvector file)               /work/kadam79/raw_data/vcf_files/filtered/all_oysters_filtered.pca/all_oysters_filtered.eigenvectors
+#        -d (standard deviation file)        /work/kadam79/raw_data/vcf_files/filtered/all_oysters_filtered.pca/all_oysters_filtered.sdev
+#        -p (projection file)                /work/kadam79/raw_data/vcf_files/filtered/all_oysters_filtered.pca/all_oysters_filtered.projections
+#        -s data centered and scaled 
