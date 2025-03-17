@@ -150,11 +150,10 @@ for file in /work/kadam79/raw_data/vcf_files/filtered/*filtered.vcf.gz; do
   gunzip "$file"
 done
 
-/work/kadam79/htslib/bgzip
-/work/kadam79/htslib/tabix
+
 for file in /work/kadam79/raw_data/vcf_files/filtered/*filtered.vcf; do
-  bgzip "$file"
-  tabix -p vcf "$file.gz"
+  /work/kadam79/htslib/bgzip "$file"
+  /work/kadam79/htslib/tabix -p vcf "$file.gz"
 done
 
 ##Step 11: merging vcf files 
