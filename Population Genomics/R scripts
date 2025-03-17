@@ -1,0 +1,8 @@
+#!user/bin/R
+
+##we will be using LEA and BiocManager to do the genome environment associations##
+##These are the links to the resources:
+#https://baylab.github.io/MarineGenomicsSemester/genome-environment-association.html#get-the-environmental-data 
+#https://academic.oup.com/mbe/article/36/4/852/5290100#138397507 
+#https://rdrr.io/bioc/LEA/
+#http://membres-timc.imag.fr/Olivier.Francois/LEA/files/LEA_github.pdf
