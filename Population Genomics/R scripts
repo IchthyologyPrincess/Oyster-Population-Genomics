@@ -1,5 +1,7 @@
 #!/usr/bin/Rscript
 
+#You need to request at least 4 cores for this job
+
 ##we will be using LEA and BiocManager to do the genome environment associations
 ##These are the links to the resources:
 #https://baylab.github.io/MarineGenomicsSemester/genome-environment-association.html#get-the-environmental-data 
@@ -30,3 +32,41 @@ pc = pca("/work/kadam79/raw_data/vcf_files/filtered/all_oysters_filtered.lfmm", 
 #        -d (standard deviation file)        /work/kadam79/raw_data/vcf_files/filtered/all_oysters_filtered.pca/all_oysters_filtered.sdev
 #        -p (projection file)                /work/kadam79/raw_data/vcf_files/filtered/all_oysters_filtered.pca/all_oysters_filtered.projections
 #        -s data centered and scaled 
+#Error: It seems that individuals 61 and 1 have too many missing data.
+
+#Removing AB10 and LF22 (61 and 1)
+
+C.virginica_lfmm2 <- vcf2lfmm(input.file = "/work/kadam79/raw_data/vcf_files/filtered/all_oysters_filtered2.vcf", output.file = "/work/kadam79/analyses/all_oysters_filtered2.lfmm" , force = TRUE)
+#- number of detected individuals: 108
+# number of detected loci:    8389803
+
+
+pc = pca("/work/kadam79/raw_data/vcf_files/filtered/all_oysters_filtered2.lfmm", scale = TRUE)
+
+#[1] "******************************"
+#[1] " Principal Component Analysis "
+#[1] "******************************"
+#summary of the options:
+
+#        -n (number of individuals)          108
+#        -L (number of loci)                 8389803
+#        -K (number of principal components) 108
+#        -x (genotype file)                  /work/kadam79/raw_data/vcf_files/filtered/all_oysters_filtered2.lfmm
+#        -a (eigenvalue file)                /work/kadam79/raw_data/vcf_files/filtered/all_oysters_filtered2.pca/all_oysters_filtered2.eigenvalues
+#        -e (eigenvector file)               /work/kadam79/raw_data/vcf_files/filtered/all_oysters_filtered2.pca/all_oysters_filtered2.eigenvectors
+#        -d (standard deviation file)        /work/kadam79/raw_data/vcf_files/filtered/all_oysters_filtered2.pca/all_oysters_filtered2.sdev
+#        -p (projection file)                /work/kadam79/raw_data/vcf_files/filtered/all_oysters_filtered2.pca/all_oysters_filtered2.projections
+#        -s data centered and scaled 
+#Error: SNP 8 is constant among individuals.
+
+#Find filter vcf file by minor allele frequency 
+# I filtered at 5, 10, and 15% with the same results
+
+#I found a forum suggesting to fix lfmm file by re-writing
+
+r <- read.lfmm("all_oysters_filtered2.lfmm") %>%
+r1 <- write.lfmm(r, "all_oysters_filtered2_recode.lfmm")
+
+#this ran for 12 hours and it timed out, no success
+#I reran the 15% MAF filtering an tried again, same results
+
